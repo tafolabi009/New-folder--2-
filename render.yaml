@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: results-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # - key: DATABASE_URL
+      #   sync: false # set in Render dashboard (use a Render PostgreSQL add-on or external DB)
+
+

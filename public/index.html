@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Results Server</title>
+	<style>
+		:root { color-scheme: light dark; }
+		body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji"; margin: 2rem; line-height: 1.4; }
+		input, textarea, button { font: inherit; }
+		.container { max-width: 800px; margin: 0 auto; }
+		.card { border: 1px solid #ccc; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+		.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+		pre { background: #00000010; padding: 12px; border-radius: 8px; overflow: auto; }
+		.code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+		button { cursor: pointer; padding: 10px 14px; border-radius: 8px; border: 1px solid #888; }
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Results Server</h1>
+		<p>Use this page to POST some JSON to <code class="code">/api/results</code> and view stored entries.</p>
+
+		<div class="grid">
+			<div class="card">
+				<h3>Submit JSON</h3>
+				<textarea id="jsonInput" rows="10" style="width: 100%">{"message":"Hello from the browser"}</textarea>
+				<div style="margin-top:8px">
+					<button id="sendBtn">POST</button>
+				</div>
+				<pre id="postResult" class="code"></pre>
+			</div>
+			<div class="card">
+				<h3>Stored Results</h3>
+				<button id="refreshBtn">Refresh</button>
+				<pre id="listResult" class="code"></pre>
+			</div>
+		</div>
+
+		<div class="card">
+			<h3>API</h3>
+			<pre class="code">POST /api/results
+Content-Type: application/json
+
+{"any":"json"}
+
+GET /api/results?limit=50&offset=0</pre>
+		</div>
+	</div>
+
+	<script>
+		const sendBtn = document.getElementById('sendBtn');
+		const refreshBtn = document.getElementById('refreshBtn');
+		const jsonInput = document.getElementById('jsonInput');
+		const postResult = document.getElementById('postResult');
+		const listResult = document.getElementById('listResult');
+
+		sendBtn.addEventListener('click', async () => {
+			try {
+				const payload = JSON.parse(jsonInput.value);
+				const r = await fetch('/api/results', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+				postResult.textContent = JSON.stringify(await r.json(), null, 2);
+				await loadList();
+			} catch (e) {
+				postResult.textContent = e.message;
+			}
+		});
+
+		async function loadList() {
+			const r = await fetch('/api/results');
+			listResult.textContent = JSON.stringify(await r.json(), null, 2);
+		}
+		refreshBtn.addEventListener('click', loadList);
+		loadList();
+	</script>
+</body>
+</html>
+
+
