@@ -35,6 +35,7 @@ Production-ready Express server that accepts JSON via POST and stores results in
 - GET `/api/results?limit=50&offset=0`
   - Response: `{ results: [ ... ] }`
 - Health: GET `/health`
+ - API Docs: `/docs` (Swagger UI), `/openapi.json`
 
 ## Deploy to Render
 1. Push this repo to GitHub/GitLab.

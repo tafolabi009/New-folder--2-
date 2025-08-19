@@ -75,11 +75,22 @@ async function insertResult(payload) {
     fs.writeFileSync(FILE_DB_PATH, JSON.stringify(existing, null, 2));
     return { id: existing.length, created_at: now, payload };
   }
-  const result = await pool.query(
-    'INSERT INTO results (payload) VALUES ($1) RETURNING id, created_at, payload',
-    [payload]
-  );
-  return result.rows[0];
+  try {
+    const result = await pool.query(
+      'INSERT INTO results (payload) VALUES ($1) RETURNING id, created_at, payload',
+      [payload]
+    );
+    return result.rows[0];
+  } catch (err) {
+    console.warn('PostgreSQL insert failed, falling back to file DB:', err.message);
+    ensureFileDb();
+    isFileFallback = true;
+    const now = new Date().toISOString();
+    const existing = JSON.parse(fs.readFileSync(FILE_DB_PATH, 'utf8'));
+    existing.push({ id: existing.length + 1, created_at: now, payload });
+    fs.writeFileSync(FILE_DB_PATH, JSON.stringify(existing, null, 2));
+    return { id: existing.length, created_at: now, payload };
+  }
 }
 
 async function listResults(limit = 50, offset = 0) {
@@ -90,11 +101,19 @@ async function listResults(limit = 50, offset = 0) {
     const all = JSON.parse(fs.readFileSync(FILE_DB_PATH, 'utf8'));
     return all.slice().reverse().slice(safeOffset, safeOffset + safeLimit);
   }
-  const { rows } = await pool.query(
-    'SELECT id, created_at, payload FROM results ORDER BY created_at DESC LIMIT $1 OFFSET $2',
-    [safeLimit, safeOffset]
-  );
-  return rows;
+  try {
+    const { rows } = await pool.query(
+      'SELECT id, created_at, payload FROM results ORDER BY created_at DESC LIMIT $1 OFFSET $2',
+      [safeLimit, safeOffset]
+    );
+    return rows;
+  } catch (err) {
+    console.warn('PostgreSQL select failed, falling back to file DB:', err.message);
+    ensureFileDb();
+    isFileFallback = true;
+    const all = JSON.parse(fs.readFileSync(FILE_DB_PATH, 'utf8'));
+    return all.slice().reverse().slice(safeOffset, safeOffset + safeLimit);
+  }
 }
 
 module.exports = {
