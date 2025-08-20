@@ -17,6 +17,9 @@ RUN set -eux; \
 # Copy application source
 COPY . .
 
+# Ensure runtime user can write within the app directory (for file DB fallback under /app/data)
+RUN chown -R node:node /app
+
 # Run as non-root user provided by base image
 USER node
 
