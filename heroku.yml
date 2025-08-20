@@ -1,0 +1,21 @@
+setup:
+  addons:
+    - plan: heroku-postgresql:hobby-dev
+      as: DATABASE
+  config:
+    NODE_ENV: production
+    PGSSLMODE: require
+
+# To use this manifest, set the app stack to "container":
+#   heroku stack:set container
+# and ensure a Dockerfile is present at the repo root.
+build:
+  docker:
+    web: Dockerfile
+  config:
+    NPM_CONFIG_PRODUCTION: "true"
+
+run:
+  web: npm start
+
+
